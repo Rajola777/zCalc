@@ -1,0 +1,490 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍬 Candy Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --pink: #FF6EB4;
+    --hot-pink: #FF1493;
+    --light-pink: #FFB6D9;
+    --pale-pink: #FFF0F7;
+    --candy-red: #FF4B6E;
+    --candy-green: #4BDE80;
+    --candy-yellow: #FFE347;
+    --candy-purple: #C084FC;
+    --candy-orange: #FF9F43;
+    --candy-blue: #60A5FA;
+    --white: #FFFFFF;
+    --shadow: rgba(255, 20, 147, 0.3);
+  }
+
+  body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #FFB6D9 0%, #FF85C1 30%, #FF6EB4 60%, #FF4BA6 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Nunito', sans-serif;
+    overflow: hidden;
+    animation: bgPulse 4s ease-in-out infinite alternate;
+  }
+
+  @keyframes bgPulse {
+    from { background: linear-gradient(135deg, #FFB6D9 0%, #FF85C1 30%, #FF6EB4 60%, #FF4BA6 100%); }
+    to   { background: linear-gradient(135deg, #FF85C1 0%, #FF4BA6 30%, #FF85C1 60%, #FFB6D9 100%); }
+  }
+
+  .candy-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .candy {
+    position: absolute;
+    top: -80px;overflow: hidden;
+    font-size: 28px;
+    animation: fall linear infinite;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
+  }
+
+  @keyframes fall {
+    0%   { transform: translateY(-80px) rotate(0deg) scale(1); opacity: 1; }
+    80%  { opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg) scale(0.8); opacity: 0; }
+  }
+
+  .calc-wrapper {
+    position: relative;
+    z-index: 10;
+    animation: floatIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  @keyframes floatIn {
+    from { opacity: 0; transform: translateY(60px) scale(0.7); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .calc-title {
+    text-align: center;
+    font-family: 'Fredoka One', cursive;
+    font-size: 2rem;
+    color: white;
+    text-shadow: 0 3px 10px var(--shadow), 0 0 20px rgba(255,255,255,0.4);
+    margin-bottom: 16px;
+    letter-spacing: 2px;
+    animation: titleWiggle 3s ease-in-out infinite;
+  }
+
+  @keyframes titleWiggle {
+    0%,100% { transform: rotate(-2deg) scale(1); }
+    25%     { transform: rotate(2deg) scale(1.05); }
+    50%     { transform: rotate(-1deg) scale(1); }
+    75%     { transform: rotate(1deg) scale(1.03); }
+  }
+
+  .calculator {
+    background: linear-gradient(160deg, #fff0f7 0%, #ffe0f0 100%);
+    border-radius: 32px;
+    padding: 28px;
+    width: 340px;
+    box-shadow:
+      0 30px 70px rgba(255,20,147,0.35),
+      0 0 0 4px rgba(255,255,255,0.6),
+      inset 0 2px 0 rgba(255,255,255,0.9);
+    border: 3px solid rgba(255,110,180,0.4);
+    animation: calcBreath 3s ease-in-out infinite alternate;
+  }
+
+  @keyframes calcBreath {
+    from { box-shadow: 0 30px 70px rgba(255,20,147,0.35), 0 0 0 4px rgba(255,255,255,0.6), inset 0 2px 0 rgba(255,255,255,0.9); }
+    to   { box-shadow: 0 40px 90px rgba(255,20,147,0.5), 0 0 0 6px rgba(255,255,255,0.8), inset 0 2px 0 rgba(255,255,255,0.9); }
+  }
+
+  .display {
+    background: linear-gradient(135deg, #2d1b3d 0%, #4a1942 100%);
+    border-radius: 20px;
+    padding: 20px 20px 16px;
+    margin-bottom: 20px;
+    box-shadow:
+      inset 0 4px 15px rgba(0,0,0,0.4),
+      0 4px 15px rgba(255,20,147,0.2);
+    border: 2px solid rgba(255,110,180,0.3);
+    position: relative;
+    overflow: hidden;
+    min-height: 95px;
+  }
+
+  .display::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,182,217,0.08), transparent);
+    animation: displayShine 3s ease-in-out infinite;
+  }
+
+  @keyframes displayShine {
+    0%   { left: -100%; }
+    100% { left: 200%; }
+  }
+
+  .display-expression {
+    font-size: 0.85rem;
+    color: rgba(255,182,217,0.7);
+    font-family: 'Fredoka One', cursive;
+    letter-spacing: 1px;
+    min-height: 20px;
+    text-align: right;
+    transition: all 0.2s;
+  }
+
+  .display-value {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.8rem;
+    color: #fff;
+    text-align: right;
+    letter-spacing: 1px;
+    text-shadow: 0 0 20px rgba(255,110,180,0.8), 0 0 40px rgba(255,20,147,0.4);
+    transition: all 0.15s;
+    word-break: break-all;
+    line-height: 1.1;
+    animation: glowPulse 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes glowPulse {
+    from { text-shadow: 0 0 20px rgba(255,110,180,0.8), 0 0 40px rgba(255,20,147,0.4); }
+    to   { text-shadow: 0 0 30px rgba(255,182,217,1), 0 0 60px rgba(255,20,147,0.7); }
+  }
+
+  .display-value.pop {
+    animation: valuePop 0.15s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes valuePop {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+
+  .buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  .btn {
+    position: relative;
+    overflow: hidden;
+    border: none;
+    border-radius: 16px;
+    height: 64px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition:
+      transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 0.12s ease,
+      filter 0.12s ease;
+    outline: none;
+    letter-spacing: 0.5px;
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 50%;
+    background: rgba(255,255,255,0.3);
+    border-radius: 16px 16px 50% 50% / 16px 16px 30px 30px;
+    pointer-events: none;
+  }
+
+  .btn:hover {
+    transform: translateY(-4px) scale(1.06);
+    filter: brightness(1.1);
+  }
+
+  .btn:active {
+    transform: translateY(1px) scale(0.94);
+    filter: brightness(0.95);
+  }
+
+  .btn.clicked {
+    animation: btnBounce 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes btnBounce {
+    0%   { transform: scale(0.88); }
+    60%  { transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+
+  .btn .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    transform: scale(0);
+    animation: rippleOut 0.5s linear;
+    pointer-events: none;
+  }
+  @keyframes rippleOut {
+    to { transform: scale(4); opacity: 0; }
+  }
+
+  .btn-num {
+    background: linear-gradient(145deg, #FF85C1, #FF6EB4);
+    color: white;
+    box-shadow: 0 6px 0 #D4589A, 0 8px 20px rgba(255,110,180,0.35);
+  }
+  .btn-num:hover { box-shadow: 0 8px 0 #D4589A, 0 12px 25px rgba(255,110,180,0.5); }
+  .btn-num:active { box-shadow: 0 2px 0 #D4589A; }
+
+  .btn-op {
+    background: linear-gradient(145deg, #FF9F43, #FF6B35);
+    color: white;
+    box-shadow: 0 6px 0 #C95520, 0 8px 20px rgba(255,107,53,0.35);
+  }
+  .btn-op:hover { box-shadow: 0 8px 0 #C95520, 0 12px 25px rgba(255,107,53,0.5); }
+  .btn-op:active { box-shadow: 0 2px 0 #C95520; }
+
+  .btn-special {
+    background: linear-gradient(145deg, #C084FC, #A855F7);
+    color: white;
+    box-shadow: 0 6px 0 #7C3AED, 0 8px 20px rgba(168,85,247,0.35);
+  }
+  .btn-special:hover { box-shadow: 0 8px 0 #7C3AED, 0 12px 25px rgba(168,85,247,0.5); }
+  .btn-special:active { box-shadow: 0 2px 0 #7C3AED; }
+
+  .btn-clear {
+    background: linear-gradient(145deg, #FF4B6E, #E63956);
+    color: white;
+    box-shadow: 0 6px 0 #C0172F, 0 8px 20px rgba(230,57,86,0.35);
+  }
+  .btn-clear:hover { box-shadow: 0 8px 0 #C0172F, 0 12px 25px rgba(230,57,86,0.5); }
+  .btn-clear:active { box-shadow: 0 2px 0 #C0172F; }
+
+  .btn-equals {
+    background: linear-gradient(145deg, #4BDE80, #22C55E);
+    color: white;
+    box-shadow: 0 6px 0 #15803D, 0 8px 20px rgba(34,197,94,0.4);
+    grid-column: span 2;
+    font-size: 1.6rem;
+    animation: equalsGlow 2s ease-in-out infinite alternate;
+  }
+  @keyframes equalsGlow {
+    from { box-shadow: 0 6px 0 #15803D, 0 8px 20px rgba(34,197,94,0.4); }
+    to   { box-shadow: 0 6px 0 #15803D, 0 8px 30px rgba(34,197,94,0.7), 0 0 20px rgba(75,222,128,0.4); }
+  }
+  .btn-equals:hover { box-shadow: 0 8px 0 #15803D, 0 14px 35px rgba(34,197,94,0.6); }
+  .btn-equals:active { box-shadow: 0 2px 0 #15803D; }
+
+  .btn-zero { grid-column: span 1; }
+
+  .confetti-piece {
+    position: fixed;
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 999;
+    animation: confettiFly 1s ease-out forwards;
+  }
+  @keyframes confettiFly {
+    0%   { transform: translate(0,0) rotate(0deg) scale(1); opacity: 1; }
+    100% { transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(0.3); opacity: 0; }
+  }
+
+  .deco {
+    position: absolute;
+    pointer-events: none;
+    font-size: 1.5rem;
+    animation: decoSpin 6s linear infinite;
+    opacity: 0.6;
+  }
+  @keyframes decoSpin {
+    from { transform: rotate(0deg) scale(1); }
+    50%  { transform: rotate(180deg) scale(1.2); }
+    to   { transform: rotate(360deg) scale(1); }
+  }
+
+  .deco-1 { top: -18px; left: -18px; animation-duration: 4s; }
+  .deco-2 { top: -18px; right: -18px; animation-duration: 5s; animation-direction: reverse; }
+  .deco-3 { bottom: -18px; left: -18px; animation-duration: 7s; }
+  .deco-4 { bottom: -18px; right: -18px; animation-duration: 3s; animation-direction: reverse; }
+</style>
+</head>
+<body>
+
+<div class="candy-container" id="candyContainer"></div>
+
+<div class="calc-wrapper">
+  <div class="calc-title">🍭 Candy Calc 🍭</div>
+
+  <div class="calculator" style="position:relative;">
+    <span class="deco deco-1">🍬</span>
+    <span class="deco deco-2">🍭</span>
+    <span class="deco deco-3">🍡</span>
+    <span class="deco deco-4">🧁</span>
+
+    <div class="display">
+      <div class="display-expression" id="expression"></div>
+      <div class="display-value" id="displayVal">0</div>
+    </div>
+
+    <div class="buttons">
+      <button class="btn btn-clear" data-action="clear">AC</button>
+      <button class="btn btn-special" data-action="sign">+/-</button>
+      <button class="btn btn-special" data-action="percent">%</button>
+      <button class="btn btn-op" data-action="op" data-val="÷">÷</button>
+
+      <button class="btn btn-num" data-action="num" data-val="7">7</button>
+      <button class="btn btn-num" data-action="num" data-val="8">8</button>
+      <button class="btn btn-num" data-action="num" data-val="9">9</button>
+      <button class="btn btn-op" data-action="op" data-val="×">×</button>
+
+      <button class="btn btn-num" data-action="num" data-val="4">4</button>
+      <button class="btn btn-num" data-action="num" data-val="5">5</button>
+      <button class="btn btn-num" data-action="num" data-val="6">6</button>
+      <button class="btn btn-op" data-action="op" data-val="−">−</button>
+
+      <button class="btn btn-num" data-action="num" data-val="1">1</button>
+      <button class="btn btn-num" data-action="num" data-val="2">2</button>
+      <button class="btn btn-num" data-action="num" data-val="3">3</button>
+      <button class="btn btn-op" data-action="op" data-val="+">+</button>
+
+      <button class="btn btn-num btn-zero" data-action="num" data-val="0">0</button>
+      <button class="btn btn-num" data-action="decimal">.</button>
+      <button class="btn btn-equals" data-action="equals">=</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== CANDY ANIMATION ==========
+const candyEmojis = ['🍬','🍭','🍡','🧁','🍦','🍰','🎀','🍫','🍩','🍪','🌸','💖','✨','🌈'];
+const container = document.getElementById('candyContainer');
+
+function createCandy() {
+  const c = document.createElement('div');
+  c.className = 'candy';
+  c.textContent = candyEmojis[Math.floor(Math.random() * candyEmojis.length)];
+  const size = 18 + Math.random() * 24;
+  const left = Math.random() * 100;
+  const duration = 4 + Math.random() * 8;
+  const delay = Math.random() * -12;
+  c.style.cssText = `
+    left: ${left}vw;
+    font-size: ${size}px;
+    animation-duration: ${duration}s;
+    animation-delay: ${delay}s;
+  `;
+  container.appendChild(c);
+  setTimeout(() => c.remove(), (duration + Math.abs(delay) + 2) * 1000);
+}
+
+for (let i = 0; i < 35; i++) createCandy();
+setInterval(() => {
+  if (container.children.length < 50) createCandy();
+}, 600);
+
+
+// ========== CALCULATOR LOGIC ==========
+let currentVal = '0';
+let prevVal = '';
+let operator = null;
+let shouldReset = false;
+
+const displayVal = document.getElementById('displayVal');
+const displayExpr = document.getElementById('expression');
+
+function updateDisplay(val) {
+  displayVal.classList.remove('pop');
+  void displayVal.offsetWidth;
+  displayVal.classList.add('pop');
+  displayVal.textContent = val;
+}
+
+function setExpression(expr) {
+  displayExpr.textContent = expr;
+}
+
+document.querySelectorAll('.btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    handleAction(this.dataset.action, this.dataset.val);
+  });
+});
+
+function handleAction(action, val) {
+  switch(action) {
+    case 'num':
+      if (shouldReset) {
+        currentVal = val;
+        shouldReset = false;
+      } else {
+        currentVal = currentVal === '0' ? val : currentVal + val;
+      }
+      updateDisplay(currentVal);
+      break;
+
+    case 'decimal':
+      if (!currentVal.includes('.')) currentVal += '.';
+      updateDisplay(currentVal);
+      break;
+
+    case 'op':
+      prevVal = currentVal;
+      operator = val;
+      shouldReset = true;
+      setExpression(prevVal + ' ' + operator);
+      break;
+
+    case 'equals':
+      if (!operator) return;
+      const a = parseFloat(prevVal);
+      const b = parseFloat(currentVal);
+      let result = 0;
+
+      switch(operator) {
+        case '+': result = a + b; break;
+        case '−': result = a - b; break;
+        case '×': result = a * b; break;
+        case '÷': result = b !== 0 ? a / b : 'Error'; break;
+      }
+
+      currentVal = result.toString();
+      updateDisplay(currentVal);
+      setExpression('');
+      operator = null;
+      shouldReset = true;
+      break;
+
+    case 'clear':
+      currentVal = '0';
+      prevVal = '';
+      operator = null;
+      shouldReset = false;
+      updateDisplay('0');
+      setExpression('');
+      break;
+
+    case 'sign':
+      currentVal = (parseFloat(currentVal) * -1).toString();
+      updateDisplay(currentVal);
+      break;
+
+    case 'percent':
+      currentVal = (parseFloat(currentVal) / 100).toString();
+      updateDisplay(currentVal);
+      break;
+  }
+}
+</script>
+</body>
+</html>
